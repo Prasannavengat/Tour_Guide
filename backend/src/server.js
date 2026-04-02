@@ -221,14 +221,18 @@ app.get("/api/nearby", async (req, res) => {
   }
 });
 
-initDatabase()
-  .then(() => {
-    app.listen(config.port, () => {
-      console.log(`API running on http://localhost:${config.port}`);
-      console.log(`Admin dashboard: http://localhost:${config.port}/admin`);
-    });
-  })
-  .catch((error) => {
+async function startServer() {
+  try {
+    await initDatabase();
+  } catch (error) {
+    // Keep service alive even if DB is unreachable; DB-backed features will be degraded.
     console.error("Database initialization failed:", error.message);
-    process.exit(1);
+  }
+
+  app.listen(config.port, () => {
+    console.log(`API running on http://localhost:${config.port}`);
+    console.log(`Admin dashboard: http://localhost:${config.port}/admin`);
   });
+}
+
+startServer();
