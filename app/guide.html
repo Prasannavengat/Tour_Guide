@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Yercaud Tour Guide | Tour Pulse</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Space+Grotesk:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-orb orb-a" aria-hidden="true"></div>
+    <div class="bg-orb orb-b" aria-hidden="true"></div>
+
+    <header class="hero">
+      <p class="eyebrow">Yercaud Tourist Guide</p>
+      <div class="top-meta">
+        <p id="userWelcome" class="meta-pill">Tourist: -</p>
+        <p id="currentLocationDisplay" class="meta-pill">Current location: Detecting...</p>
+      </div>
+      <h1 id="guideTitle">Plan smart, travel safe</h1>
+      <p class="subtitle" id="guideSubtitle"></p>
+    </header>
+
+    <main class="grid">
+      <section class="panel controls">
+        <h2>Guide Controls</h2>
+        <label for="apiBaseUrl">API Base URL</label>
+        <input id="apiBaseUrl" type="text" value="http://localhost:4000" />
+
+        <label for="radius">Nearby search radius (meters)</label>
+        <input id="radius" type="number" min="500" max="10000" step="100" value="3500" />
+
+        <div class="button-row">
+          <button id="refreshBtn" class="primary">Refresh Guide</button>
+          <button id="changeLocationBtn">Change Location</button>
+        </div>
+
+        <p id="statusText" class="status">Ready.</p>
+        <p id="locationText" class="location"></p>
+      </section>
+
+      <section class="panel crowd-panel">
+        <div class="panel-head">
+          <h2>Live Site Crowd (Yercaud)</h2>
+          <span class="pill">From sensor events</span>
+        </div>
+        <div id="siteCards" class="cards"></div>
+      </section>
+
+      <section class="panel recommendations-panel">
+        <div class="panel-head">
+          <h2>Less-Crowded Recommendations</h2>
+          <span class="pill">Smart ranking</span>
+        </div>
+        <div id="recommendationList" class="list"></div>
+      </section>
+
+      <section class="panel nearby-panel">
+        <div class="panel-head">
+          <h2>Nearby in Yercaud</h2>
+          <span class="pill">Tourist essentials</span>
+        </div>
+        <div class="chip-row">
+          <button class="chip active" data-type="hotel">Hotels</button>
+          <button class="chip" data-type="hospital">Hospitals</button>
+          <button class="chip" data-type="restaurant">Restaurants</button>
+          <button class="chip" data-type="police">Police Stations</button>
+        </div>
+        <div id="nearbyList" class="list"></div>
+      </section>
+    </main>
+
+    <script type="module" src="guide.js"></script>
+  </body>
+</html>

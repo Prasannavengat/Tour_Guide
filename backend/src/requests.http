@@ -1,0 +1,37 @@
+### Health
+GET http://localhost:4000/health
+
+### List Sites
+GET http://localhost:4000/api/sites
+
+### Simulate entry crossing
+POST http://localhost:4000/api/sensor/events
+Content-Type: application/json
+
+{
+  "siteId": "site-temple-view",
+  "gateId": "gate-1",
+  "direction": "in"
+}
+
+### Simulate exit crossing
+POST http://localhost:4000/api/sensor/events
+Content-Type: application/json
+
+{
+  "siteId": "site-temple-view",
+  "gateId": "gate-1",
+  "direction": "out"
+}
+
+### Recommendations
+GET http://localhost:4000/api/recommendations?lat=11.02&lng=76.97&limit=3
+
+### Nearby hospitals
+GET http://localhost:4000/api/nearby?lat=11.02&lng=76.97&type=hospital&radius=3000&limit=5
+
+### Nearby police
+GET http://localhost:4000/api/nearby?lat=11.02&lng=76.97&type=police&radius=3000&limit=5
+
+### Nearby essentials
+GET http://localhost:4000/api/nearby?lat=11.02&lng=76.97&type=essentials&radius=3000&limit=5

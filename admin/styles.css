@@ -1,0 +1,161 @@
+:root {
+  --bg: #0f1728;
+  --panel: #f9fbff;
+  --ink: #0c1630;
+  --ink-soft: #4a5470;
+  --accent: #137a6e;
+  --accent-2: #1f5ccc;
+  --line: rgba(12, 22, 48, 0.14);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Manrope", sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 14% 16%, rgba(19, 122, 110, 0.3), transparent 32%),
+    radial-gradient(circle at 84% 12%, rgba(31, 92, 204, 0.3), transparent 34%),
+    var(--bg);
+}
+
+.shell {
+  max-width: 1050px;
+  margin: 0 auto;
+  padding: 36px 18px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.2);
+}
+
+.login-card {
+  max-width: 440px;
+  margin: 40px auto;
+}
+
+h1,
+h2,
+h3 {
+  font-family: "Sora", sans-serif;
+  margin: 0 0 8px;
+}
+
+p {
+  margin: 0 0 12px;
+  color: var(--ink-soft);
+}
+
+label {
+  display: block;
+  margin-top: 10px;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+}
+
+input,
+select,
+button {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  padding: 10px;
+  font-family: inherit;
+}
+
+button {
+  margin-top: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+button.subtle {
+  width: auto;
+  margin-top: 0;
+  padding: 8px 12px;
+  background: #fff;
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+
+.status {
+  margin-top: 12px;
+  font-size: 0.9rem;
+}
+
+.hidden {
+  display: none;
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.row {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: 1.8fr 1fr 1fr;
+  gap: 10px;
+  align-items: end;
+}
+
+.stats {
+  margin-top: 14px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+}
+
+.stat {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px;
+  background: #fff;
+}
+
+.stat h4 {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+.stat p {
+  margin: 6px 0 0;
+  color: var(--ink);
+  font-weight: 800;
+  font-size: 1.15rem;
+}
+
+.chart-card {
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  background: #fff;
+}
+
+#trendChart {
+  width: 100%;
+  max-width: 100%;
+  border-radius: 8px;
+  border: 1px solid rgba(12, 22, 48, 0.08);
+}
+
+@media (max-width: 850px) {
+  .row {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tour Pulse Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Sora:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="card login-card" id="loginCard">
+        <h1>Site Authority Login</h1>
+        <p>Access crowd analytics and gate trend intelligence.</p>
+
+        <label for="apiBaseUrl">API Base URL</label>
+        <input id="apiBaseUrl" type="text" value="http://localhost:4000" />
+
+        <label for="username">Username</label>
+        <input id="username" type="text" placeholder="admin" />
+
+        <label for="password">Password</label>
+        <input id="password" type="password" placeholder="Enter password" />
+
+        <button id="loginBtn">Login</button>
+        <p class="status" id="loginStatus">Awaiting credentials.</p>
+      </section>
+
+      <section class="card dashboard hidden" id="dashboard">
+        <div class="head">
+          <h2>Admin Dashboard</h2>
+          <button id="logoutBtn" class="subtle">Logout</button>
+        </div>
+
+        <div class="row">
+          <label for="siteSelect">Select site</label>
+          <select id="siteSelect"></select>
+
+          <label for="hoursInput">Hours</label>
+          <input id="hoursInput" type="number" min="1" max="168" value="24" />
+
+          <button id="refreshBtn">Load Trends</button>
+        </div>
+
+        <div class="stats" id="statsCards"></div>
+
+        <section class="chart-card">
+          <h3>Hourly Net Flow</h3>
+          <canvas id="trendChart" width="900" height="320"></canvas>
+        </section>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: tour-pulse-guide
+    env: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: 4000
+      - key: NODE_ENV
+        value: production
+      - key: OVERPASS_URL
+        value: https://overpass-api.de/api/interpreter
+      - key: OVERPASS_BACKUP_URL
+        value: https://overpass.kumi.systems/api/interpreter
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: GOOGLE_MAPS_API_KEY
+        sync: false
