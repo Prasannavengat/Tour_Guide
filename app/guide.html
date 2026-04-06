@@ -27,27 +27,18 @@
     </header>
 
     <main class="grid">
-      <section class="panel controls">
-        <h2>Guide Controls</h2>
-        <label for="apiBaseUrl">API Base URL</label>
-        <input id="apiBaseUrl" type="text" value="http://localhost:4000" />
-
-        <label for="radius">Nearby search radius (meters)</label>
-        <input id="radius" type="number" min="500" max="10000" step="100" value="3500" />
-
-        <div class="button-row">
-          <button id="refreshBtn" class="primary">Refresh Guide</button>
-          <button id="changeLocationBtn">Change Location</button>
+      <section class="panel location-info-panel">
+        <div class="panel-head">
+          <h2>Location Details</h2>
         </div>
-
-        <p id="statusText" class="status">Ready.</p>
-        <p id="locationText" class="location"></p>
+        <div id="locationDetailsContainer" class="location-details">
+          <!-- Location details will be inserted here -->
+        </div>
       </section>
 
       <section class="panel crowd-panel">
         <div class="panel-head">
           <h2>Live Site Crowd (Yercaud)</h2>
-          <span class="pill">From sensor events</span>
         </div>
         <div id="siteCards" class="cards"></div>
       </section>
@@ -55,7 +46,6 @@
       <section class="panel recommendations-panel">
         <div class="panel-head">
           <h2>Less-Crowded Recommendations</h2>
-          <span class="pill">Smart ranking</span>
         </div>
         <div id="recommendationList" class="list"></div>
       </section>
@@ -63,13 +53,13 @@
       <section class="panel nearby-panel">
         <div class="panel-head">
           <h2>Nearby in Yercaud</h2>
-          <span class="pill">Tourist essentials</span>
         </div>
         <div class="chip-row">
           <button class="chip active" data-type="hotel">Hotels</button>
           <button class="chip" data-type="hospital">Hospitals</button>
           <button class="chip" data-type="restaurant">Restaurants</button>
           <button class="chip" data-type="police">Police Stations</button>
+          <button class="chip" data-type="fuel">Fuel Stations</button>
         </div>
         <div id="nearbyList" class="list"></div>
       </section>

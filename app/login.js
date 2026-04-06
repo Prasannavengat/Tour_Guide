@@ -5,7 +5,9 @@ const dom = {
   sendOtpBtn: document.getElementById("sendOtpBtn"),
   verifyOtpBtn: document.getElementById("verifyOtpBtn"),
   loginBtn: document.getElementById("loginBtn"),
-  status: document.getElementById("loginStatus")
+  status: document.getElementById("loginStatus"),
+  otpSection: document.getElementById("otpSection"),
+  nameSection: document.getElementById("nameSection")
 };
 
 const state = {
@@ -53,6 +55,11 @@ async function requestOtp() {
     setStatus("Requesting OTP...");
     const data = await postJson(getApiUrl("/api/auth/request-otp"), { phone });
     state.verifiedPhone = data.phone;
+    
+    // Show OTP section after successful OTP generation
+    dom.otpSection.style.display = "block";
+    dom.otp.focus();
+    
     setStatus(
       data.devOtp
         ? `OTP sent. Dev OTP: ${data.devOtp}`
@@ -78,8 +85,11 @@ async function verifyOtp() {
 
     state.otpVerified = true;
     state.verifiedPhone = phone;
-    dom.name.disabled = false;
+    
+    // Show name section after successful OTP verification
+    dom.nameSection.style.display = "block";
     dom.name.focus();
+    
     setStatus("Phone verified. Enter your name to continue.");
   } catch (error) {
     setStatus(`OTP verification failed: ${error.message}`);

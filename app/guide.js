@@ -1,9 +1,8 @@
 const state = {
   apiBaseUrl: "http://localhost:4000",
-  lat: 11.7786,
-  lng: 78.2097,
   nearbyType: "hotel",
-  selectedSpot: null
+  selectedSpot: null,
+  selectedDistrict: null
 };
 
 const dom = {
@@ -11,21 +10,12 @@ const dom = {
   subtitle: document.getElementById("guideSubtitle"),
   userWelcome: document.getElementById("userWelcome"),
   currentLocationDisplay: document.getElementById("currentLocationDisplay"),
-  apiBaseUrl: document.getElementById("apiBaseUrl"),
-  radius: document.getElementById("radius"),
-  refreshBtn: document.getElementById("refreshBtn"),
-  changeLocationBtn: document.getElementById("changeLocationBtn"),
-  statusText: document.getElementById("statusText"),
-  locationText: document.getElementById("locationText"),
+  locationDetailsContainer: document.getElementById("locationDetailsContainer"),
   siteCards: document.getElementById("siteCards"),
   recommendationList: document.getElementById("recommendationList"),
   nearbyList: document.getElementById("nearbyList"),
   chips: Array.from(document.querySelectorAll(".chip"))
 };
-
-function setStatus(message) {
-  dom.statusText.textContent = message;
-}
 
 function getApiUrl(path) {
   const base = state.apiBaseUrl.replace(/\/$/, "");
@@ -39,9 +29,62 @@ function formatCrowd(occupancyRatio) {
   return "light";
 }
 
+function renderLocationDetails() {
+  if (!state.selectedSpot) return;
+
+  const spot = state.selectedSpot;
+  const html = `
+    <article class="location-detail-card">
+      <h3>${spot.name}</h3>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="detail-label">District:</span>
+          <span class="detail-value">${state.selectedDistrict}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Description:</span>
+          <span class="detail-value">${spot.note}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Latitude:</span>
+          <span class="detail-value">${spot.lat.toFixed(4)}°</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Longitude:</span>
+          <span class="detail-value">${spot.lng.toFixed(4)}°</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Category:</span>
+          <span class="detail-value">Tourist Attraction</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Status:</span>
+          <span class="detail-value" style="color: #4CAF50; font-weight: bold;">Active & Open</span>
+        </div>
+      </div>
+    </article>
+  `;
+  
+  dom.locationDetailsContainer.innerHTML = html;
+}
+
+function renderCrowdCard(site) {
+  const crowd = formatCrowd(site.occupancyRatio);
+  dom.siteCards.innerHTML = `
+    <article class="card crowd-highlight-card">
+      <h3>${site.name}</h3>
+      <p class="meta">District: ${site.district || state.selectedDistrict}</p>
+      <p class="meta">Count: ${site.currentCount} / ${site.capacity}</p>
+      <p class="meta">Updated: ${new Date(site.updatedAt).toLocaleTimeString()}</p>
+      <span class="tag ${crowd}">${crowd.replace("_", " ")}</span>
+    </article>
+  `;
+}
+
 function readSession() {
   const userRaw = sessionStorage.getItem("tourist_user");
   const spotRaw = sessionStorage.getItem("tourist_selected_spot");
+  const districtRaw = sessionStorage.getItem("tourist_selected_district");
 
   if (!userRaw) {
     window.location.href = "index.html";
@@ -55,13 +98,15 @@ function readSession() {
 
   const user = JSON.parse(userRaw);
   state.selectedSpot = JSON.parse(spotRaw);
-  state.lat = state.selectedSpot.lat;
-  state.lng = state.selectedSpot.lng;
+  state.selectedDistrict = districtRaw || "Tamil Nadu";
 
   dom.userWelcome.textContent = `Tourist: ${user.name}`;
   dom.title.textContent = `${state.selectedSpot.name} Tour Guide`;
-  dom.subtitle.textContent = `Live crowd, low-crowd recommendations, hotels, hospitals, and restaurants around ${state.selectedSpot.name}, Yercaud.`;
-  dom.locationText.textContent = `Selected location: ${state.selectedSpot.name} (${state.lat}, ${state.lng})`;
+  dom.subtitle.textContent = `Live crowd, low-crowd recommendations, hotels, hospitals, and restaurants around ${state.selectedSpot.name}, ${state.selectedDistrict}.`;
+  
+  // Render location details
+  renderLocationDetails();
+  
   return true;
 }
 
@@ -163,52 +208,48 @@ async function getJson(url) {
 }
 
 async function loadSites() {
-  const data = await getJson(getApiUrl("/api/sites"));
-  renderSites(data.sites || []);
+  const siteId = state.selectedSpot?.id || "";
+  const query = siteId ? `?siteId=${encodeURIComponent(siteId)}` : "";
+  const data = await getJson(getApiUrl(`/api/sites${query}`));
+  const sites = data.sites || [];
+
+  if (sites.length) {
+    renderCrowdCard(sites[0]);
+  } else {
+    dom.siteCards.innerHTML = '<p class="meta">No crowd data available for this location.</p>';
+  }
 }
 
 async function loadRecommendations() {
-  const query = `?lat=${state.lat}&lng=${state.lng}&limit=5`;
+  const query = `?lat=${state.selectedSpot.lat}&lng=${state.selectedSpot.lng}&limit=5`;
   const data = await getJson(getApiUrl(`/api/recommendations${query}`));
   renderRecommendations(data.recommendations || []);
 }
 
 async function loadNearby() {
-  const radius = Number(dom.radius.value || 3500);
-  const query = `?lat=${state.lat}&lng=${state.lng}&type=${state.nearbyType}&radius=${radius}&limit=10`;
+  const radius = 3500;
+  const query = `?lat=${state.selectedSpot.lat}&lng=${state.selectedSpot.lng}&type=${state.nearbyType}&radius=${radius}&limit=10`;
   const data = await getJson(getApiUrl(`/api/nearby${query}`));
   renderNearby(data.places || []);
 }
 
 async function refreshAll() {
   try {
-    setStatus("Loading Yercaud travel data...");
     await loadSites();
     await loadRecommendations();
     await loadNearby();
-    setStatus("Guide updated successfully.");
   } catch (error) {
-    setStatus(`Error: ${error.message}`);
+    console.error("Error loading guide data:", error.message);
   }
 }
 
 function bindEvents() {
-  dom.apiBaseUrl.addEventListener("change", () => {
-    state.apiBaseUrl = dom.apiBaseUrl.value.trim() || "http://localhost:4000";
-  });
-
-  dom.refreshBtn.addEventListener("click", refreshAll);
-
-  dom.changeLocationBtn.addEventListener("click", () => {
-    window.location.href = "location.html";
-  });
-
   dom.chips.forEach((chip) => {
     chip.addEventListener("click", () => {
       dom.chips.forEach((c) => c.classList.remove("active"));
       chip.classList.add("active");
       state.nearbyType = chip.dataset.type;
-      loadNearby().catch((error) => setStatus(`Error: ${error.message}`));
+      loadNearby().catch((error) => console.error("Error loading nearby:", error.message));
     });
   });
 }

@@ -20,6 +20,7 @@ function ensureLoggedIn() {
 }
 
 function populateLocations() {
+  dom.select.innerHTML = '<option value="">-- Select a Location --</option>';
   yercaudSpots.forEach((spot) => {
     const option = document.createElement("option");
     option.value = spot.id;
@@ -38,6 +39,7 @@ function continueToGuide() {
   }
 
   sessionStorage.setItem("tourist_selected_spot", JSON.stringify(selected));
+  sessionStorage.setItem("tourist_selected_district", "Yercaud");
   window.location.href = "guide.html";
 }
 

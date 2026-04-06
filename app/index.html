@@ -31,15 +31,18 @@
           <button id="sendOtpBtn" class="primary">Get OTP</button>
         </div>
 
-        <label for="touristOtp">Enter OTP</label>
-        <input id="touristOtp" type="text" maxlength="6" placeholder="6-digit OTP" />
-
-        <div class="button-row">
-          <button id="verifyOtpBtn">Verify OTP</button>
+        <div id="otpSection" style="display: none;">
+          <label for="touristOtp">Enter OTP</label>
+          <input id="touristOtp" type="text" maxlength="6" placeholder="6-digit OTP" />
+          <div class="button-row">
+            <button id="verifyOtpBtn">Verify OTP</button>
+          </div>
         </div>
 
-        <label for="touristName">Name (after verification)</label>
-        <input id="touristName" type="text" placeholder="Enter your name" disabled />
+        <div id="nameSection" style="display: none;">
+          <label for="touristName">Your Name</label>
+          <input id="touristName" type="text" placeholder="Enter your name" />
+        </div>
 
         <button id="loginBtn" class="primary">Continue</button>
         <p id="loginStatus" class="status">Verify your phone to continue.</p>
