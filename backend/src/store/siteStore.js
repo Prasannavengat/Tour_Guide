@@ -1,10 +1,28 @@
-import { seedSites } from "../data/seedSites.js";
+import { yercaudSpots } from "../../../app/locationData.js";
+
+// Construct districts structure from yercaudSpots for Yercaud-focused app
+const yercaudDistricts = [
+  {
+    name: "Yercaud",
+    spots: yercaudSpots
+  }
+];
+
+function buildSeedSites() {
+  return yercaudDistricts.flatMap((district) =>
+    district.spots.map((spot, index) => ({
+      ...spot,
+      district: district.name,
+      capacity: spot.capacity || 260 + ((district.name.length + index * 17) % 180)
+    }))
+  );
+}
 
 class SiteStore {
   constructor() {
     this.sites = new Map();
 
-    seedSites.forEach((site) => {
+    buildSeedSites().forEach((site) => {
       this.sites.set(site.id, {
         ...site,
         currentCount: Math.floor(site.capacity * 0.35),

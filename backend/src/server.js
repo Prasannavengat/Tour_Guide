@@ -9,6 +9,10 @@ import { getRecommendations } from "./services/recommendationService.js";
 import { getNearbyPlaces } from "./services/nearbyService.js";
 import { validateAdminCredentials, issueAdminToken } from "./services/authService.js";
 import { createOtpForPhone, verifyOtpForPhone } from "./services/touristAuthService.js";
+import {
+  sendVerificationCode,
+  checkVerificationViaTwilioVerify
+} from "./services/smsService.js";
 import { requireAdmin } from "./middleware/authMiddleware.js";
 import {
   initDatabase,
@@ -47,19 +51,37 @@ app.post("/api/admin/login", async (req, res) => {
   return res.json({ token: issueAdminToken() });
 });
 
-app.post("/api/auth/request-otp", (req, res) => {
+app.post("/api/auth/request-otp", async (req, res) => {
   try {
     const { phone } = req.body;
-    const { normalizedPhone, otp } = createOtpForPhone(phone);
 
-    console.log(`Tourist OTP for ${normalizedPhone}: ${otp}`);
+    if (config.smsProvider === "twilio" && config.twilioVerifyServiceSid) {
+      const smsResult = await sendVerificationCode(phone);
+      return res.json({
+        ok: true,
+        phone: smsResult.toPhone || phone,
+        message: "Verification code sent to mobile number",
+        smsSent: true
+      });
+    }
+
+    const { normalizedPhone, otp } = createOtpForPhone(phone);
+    const smsResult = await sendVerificationCode(normalizedPhone, otp);
+
+    if (!smsResult.sent && process.env.NODE_ENV === "production") {
+      return res.status(502).json({
+        error: "OTP could not be delivered to the mobile number"
+      });
+    }
 
     return res.json({
       ok: true,
       phone: normalizedPhone,
-      // Development helper so testing works without SMS gateway.
+      message: smsResult.sent
+        ? "Verification code sent to mobile number"
+        : "Verification code generated for development",
       devOtp: process.env.NODE_ENV === "production" ? undefined : otp,
-      message: "OTP generated"
+      smsSent: smsResult.sent
     });
   } catch (error) {
     return res.status(400).json({ error: error.message });
@@ -67,6 +89,22 @@ app.post("/api/auth/request-otp", (req, res) => {
 });
 
 app.post("/api/auth/verify-otp", (req, res) => {
+  if (config.smsProvider === "twilio" && config.twilioVerifyServiceSid) {
+    (async () => {
+      try {
+        const { phone, otp } = req.body;
+        const result = await checkVerificationViaTwilioVerify(phone, otp);
+        if (!result.ok) {
+          return res.status(400).json({ error: "Invalid OTP" });
+        }
+        return res.json({ ok: true, phone: result.phone, message: "Phone verified" });
+      } catch (error) {
+        return res.status(400).json({ error: error.message });
+      }
+    })();
+    return;
+  }
+
   const { phone, otp } = req.body;
   const result = verifyOtpForPhone(phone, otp);
 
@@ -109,8 +147,11 @@ app.get("/api/geocode", async (req, res) => {
   }
 });
 
-app.get("/api/sites", (_req, res) => {
-  const sites = siteStore.allSites().map((site) => ({
+app.get("/api/sites", (req, res) => {
+  const siteId = String(req.query.siteId || "").trim();
+  const sitesSource = siteId ? [siteStore.getSite(siteId)].filter(Boolean) : siteStore.allSites();
+
+  const sites = sitesSource.map((site) => ({
     ...site,
     occupancyRatio: Number((site.currentCount / site.capacity).toFixed(2))
   }));

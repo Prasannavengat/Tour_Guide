@@ -11,5 +11,10 @@ export const config = {
   adminUsername: process.env.ADMIN_USERNAME || "admin",
   adminPassword: process.env.ADMIN_PASSWORD || "admin123",
   databaseUrl: process.env.DATABASE_URL || "",
-  googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY || ""
+  googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY || "",
+  smsProvider: process.env.SMS_PROVIDER || "",
+  twilioAccountSid: process.env.TWILIO_ACCOUNT_SID || "",
+  twilioAuthToken: process.env.TWILIO_AUTH_TOKEN || "",
+  twilioFromNumber: process.env.TWILIO_FROM_NUMBER || "",
+  twilioVerifyServiceSid: process.env.TWILIO_VERIFY_SERVICE_SID || ""
 };

@@ -1,3 +1,5 @@
+import crypto from "crypto";
+
 const otpStore = new Map();
 
 const OTP_EXPIRY_MS = 5 * 60 * 1000;
@@ -11,7 +13,7 @@ function normalizePhone(phone) {
 }
 
 function generateOtp() {
-  return String(Math.floor(100000 + Math.random() * 900000));
+  return String(crypto.randomInt(100000, 1000000));
 }
 
 export function createOtpForPhone(phone) {
