@@ -164,17 +164,15 @@ export async function sendVerificationCode(phone, otp) {
     }
 
     try {
-      const response = await axios.get("https://www.fast2sms.com/dev/bulkV2", {
+      const response = await axios.post("https://www.fast2sms.com/dev/bulkV2", {
+        variables_values: String(otp || ""),
+        route: "otp",
+        numbers: toPhone,
+        flash: 0
+      }, {
         headers: {
-          authorization: config.fast2smsApiKey
-        },
-        params: {
-          route: "v3",
-          sender_id: (config.smsSender || "TOTPAL").slice(0, 6).toUpperCase(),
-          message: buildMessage(otp),
-          language: "english",
-          flash: 0,
-          numbers: toPhone
+          authorization: config.fast2smsApiKey,
+          "Content-Type": "application/json"
         },
         timeout: 10000
       });
