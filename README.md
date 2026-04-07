@@ -149,9 +149,9 @@ This repository includes `render.yaml` for one-click deployment.
   - `ADMIN_PASSWORD`
   - `DATABASE_URL` (optional, but required for trend persistence)
   - `GOOGLE_MAPS_API_KEY` (required for address name from live location)
-  - `TWILIO_ACCOUNT_SID` (required for SMS OTP)
-  - `TWILIO_AUTH_TOKEN` (required for SMS OTP)
-  - `TWILIO_VERIFY_SERVICE_SID` (required for SMS OTP)
+  - `SMS_PROVIDER` (`twilio` or `fast2sms`)
+  - For Twilio: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_VERIFY_SERVICE_SID`
+  - For Fast2SMS: `FAST2SMS_API_KEY`, `SMS_SENDER`
 6. Deploy and open your Render service URL.
 
 Public URLs after deploy:

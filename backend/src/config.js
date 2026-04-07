@@ -13,8 +13,10 @@ export const config = {
   databaseUrl: process.env.DATABASE_URL || "",
   googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY || "",
   smsProvider: process.env.SMS_PROVIDER || "",
+  smsSender: process.env.SMS_SENDER || "TourPulse",
   twilioAccountSid: process.env.TWILIO_ACCOUNT_SID || "",
   twilioAuthToken: process.env.TWILIO_AUTH_TOKEN || "",
   twilioFromNumber: process.env.TWILIO_FROM_NUMBER || "",
-  twilioVerifyServiceSid: process.env.TWILIO_VERIFY_SERVICE_SID || ""
+  twilioVerifyServiceSid: process.env.TWILIO_VERIFY_SERVICE_SID || "",
+  fast2smsApiKey: process.env.FAST2SMS_API_KEY || ""
 };

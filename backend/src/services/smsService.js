@@ -7,6 +7,13 @@ function buildMessage(otp) {
   return `Your Tour Pulse verification code is ${otp}. It expires in 5 minutes.`;
 }
 
+function formatPhoneForFast2Sms(phone) {
+  const digits = String(phone || "").replace(/\D/g, "");
+  if (digits.length === 10) return digits;
+  if (digits.length === 12 && digits.startsWith("91")) return digits.slice(2);
+  return "";
+}
+
 function formatPhoneForTwilio(phone) {
   const digits = String(phone || "").replace(/\D/g, "");
   if (!digits) return "";
@@ -146,8 +153,51 @@ export async function checkVerificationViaTwilioVerify(phone, otp) {
 }
 
 export async function sendVerificationCode(phone, otp) {
+  if (config.smsProvider === "fast2sms") {
+    if (!config.fast2smsApiKey) {
+      return { sent: false, reason: "Fast2SMS API key not configured" };
+    }
+
+    const toPhone = formatPhoneForFast2Sms(phone);
+    if (!toPhone) {
+      throw new Error("Invalid destination phone number");
+    }
+
+    try {
+      const response = await axios.get("https://www.fast2sms.com/dev/bulkV2", {
+        headers: {
+          authorization: config.fast2smsApiKey
+        },
+        params: {
+          route: "v3",
+          sender_id: (config.smsSender || "TOTPAL").slice(0, 6).toUpperCase(),
+          message: buildMessage(otp),
+          language: "english",
+          flash: 0,
+          numbers: toPhone
+        },
+        timeout: 10000
+      });
+
+      const returnValue = response?.data?.return;
+      if (returnValue === false) {
+        const providerMessage = response?.data?.message || "Fast2SMS failed to send OTP";
+        return { sent: false, reason: providerMessage, providerResponse: response.data };
+      }
+
+      return {
+        sent: true,
+        providerResponse: response.data,
+        toPhone: `+91${toPhone}`
+      };
+    } catch (error) {
+      const providerMessage = error?.response?.data?.message;
+      throw new Error(providerMessage || "Fast2SMS request failed");
+    }
+  }
+
   if (!hasTwilioConfig()) {
-    return { sent: false, reason: "Twilio SMS provider not configured" };
+    return { sent: false, reason: "SMS provider not configured" };
   }
 
   const verifyServiceSid = await resolveTwilioVerifyServiceSid();

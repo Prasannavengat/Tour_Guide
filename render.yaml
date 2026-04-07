@@ -26,9 +26,13 @@ services:
         sync: false
       - key: SMS_PROVIDER
         value: twilio
+      - key: SMS_SENDER
+        value: TourPulse
       - key: TWILIO_ACCOUNT_SID
         sync: false
       - key: TWILIO_AUTH_TOKEN
         sync: false
       - key: TWILIO_VERIFY_SERVICE_SID
+        sync: false
+      - key: FAST2SMS_API_KEY
         sync: false
