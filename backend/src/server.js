@@ -11,7 +11,8 @@ import { validateAdminCredentials, issueAdminToken } from "./services/authServic
 import { createOtpForPhone, verifyOtpForPhone } from "./services/touristAuthService.js";
 import {
   sendVerificationCode,
-  checkVerificationViaTwilioVerify
+  checkVerificationViaTwilioVerify,
+  canUseTwilioVerify
 } from "./services/smsService.js";
 import { requireAdmin } from "./middleware/authMiddleware.js";
 import {
@@ -55,7 +56,7 @@ app.post("/api/auth/request-otp", async (req, res) => {
   try {
     const { phone } = req.body;
 
-    if (config.smsProvider === "twilio" && config.twilioVerifyServiceSid) {
+    if (config.smsProvider === "twilio" && (await canUseTwilioVerify())) {
       const smsResult = await sendVerificationCode(phone);
       return res.json({
         ok: true,
@@ -70,7 +71,7 @@ app.post("/api/auth/request-otp", async (req, res) => {
 
     if (!smsResult.sent && process.env.NODE_ENV === "production") {
       return res.status(502).json({
-        error: "OTP could not be delivered to the mobile number"
+        error: smsResult.reason || "OTP could not be delivered to the mobile number"
       });
     }
 
@@ -88,21 +89,18 @@ app.post("/api/auth/request-otp", async (req, res) => {
   }
 });
 
-app.post("/api/auth/verify-otp", (req, res) => {
-  if (config.smsProvider === "twilio" && config.twilioVerifyServiceSid) {
-    (async () => {
-      try {
-        const { phone, otp } = req.body;
-        const result = await checkVerificationViaTwilioVerify(phone, otp);
-        if (!result.ok) {
-          return res.status(400).json({ error: "Invalid OTP" });
-        }
-        return res.json({ ok: true, phone: result.phone, message: "Phone verified" });
-      } catch (error) {
-        return res.status(400).json({ error: error.message });
+app.post("/api/auth/verify-otp", async (req, res) => {
+  if (config.smsProvider === "twilio" && (await canUseTwilioVerify())) {
+    try {
+      const { phone, otp } = req.body;
+      const result = await checkVerificationViaTwilioVerify(phone, otp);
+      if (!result.ok) {
+        return res.status(400).json({ error: "Invalid OTP" });
       }
-    })();
-    return;
+      return res.json({ ok: true, phone: result.phone, message: "Phone verified" });
+    } catch (error) {
+      return res.status(400).json({ error: error.message });
+    }
   }
 
   const { phone, otp } = req.body;

@@ -1,6 +1,8 @@
 import axios from "axios";
 import { config } from "../config.js";
 
+let cachedVerifyServiceSid = "";
+
 function buildMessage(otp) {
   return `Your Tour Pulse verification code is ${otp}. It expires in 5 minutes.`;
 }
@@ -25,16 +27,43 @@ function hasTwilioConfig() {
   );
 }
 
-function hasTwilioVerifyConfig() {
-  return Boolean(hasTwilioConfig() && config.twilioVerifyServiceSid);
-}
-
 function buildTwilioAuthHeader() {
   const auth = Buffer.from(`${config.twilioAccountSid}:${config.twilioAuthToken}`).toString("base64");
   return `Basic ${auth}`;
 }
 
-export async function sendVerificationViaTwilioVerify(phone) {
+async function resolveTwilioVerifyServiceSid() {
+  if (!hasTwilioConfig()) return "";
+
+  if (config.twilioVerifyServiceSid) {
+    cachedVerifyServiceSid = config.twilioVerifyServiceSid;
+    return config.twilioVerifyServiceSid;
+  }
+
+  if (cachedVerifyServiceSid) {
+    return cachedVerifyServiceSid;
+  }
+
+  try {
+    const response = await axios.get("https://verify.twilio.com/v2/Services?PageSize=1", {
+      headers: { Authorization: buildTwilioAuthHeader() },
+      timeout: 10000
+    });
+
+    const discoveredSid = response?.data?.services?.[0]?.sid || "";
+    cachedVerifyServiceSid = discoveredSid;
+    return discoveredSid;
+  } catch (_error) {
+    return "";
+  }
+}
+
+export async function canUseTwilioVerify() {
+  const sid = await resolveTwilioVerifyServiceSid();
+  return Boolean(sid);
+}
+
+export async function sendVerificationViaTwilioVerify(phone, verifyServiceSid) {
   const toPhone = formatPhoneForTwilio(phone);
   if (!toPhone) {
     throw new Error("Invalid destination phone number");
@@ -46,7 +75,7 @@ export async function sendVerificationViaTwilioVerify(phone) {
 
   try {
     const response = await axios.post(
-      `https://verify.twilio.com/v2/Services/${config.twilioVerifyServiceSid}/Verifications`,
+      `https://verify.twilio.com/v2/Services/${verifyServiceSid}/Verifications`,
       params,
       {
         headers: {
@@ -73,6 +102,11 @@ export async function sendVerificationViaTwilioVerify(phone) {
 }
 
 export async function checkVerificationViaTwilioVerify(phone, otp) {
+  const verifyServiceSid = await resolveTwilioVerifyServiceSid();
+  if (!verifyServiceSid) {
+    throw new Error("Twilio Verify service not configured");
+  }
+
   const toPhone = formatPhoneForTwilio(phone);
   if (!toPhone) {
     throw new Error("Invalid destination phone number");
@@ -84,7 +118,7 @@ export async function checkVerificationViaTwilioVerify(phone, otp) {
 
   try {
     const response = await axios.post(
-      `https://verify.twilio.com/v2/Services/${config.twilioVerifyServiceSid}/VerificationCheck`,
+      `https://verify.twilio.com/v2/Services/${verifyServiceSid}/VerificationCheck`,
       params,
       {
         headers: {
@@ -116,8 +150,9 @@ export async function sendVerificationCode(phone, otp) {
     return { sent: false, reason: "Twilio SMS provider not configured" };
   }
 
-  if (hasTwilioVerifyConfig()) {
-    return sendVerificationViaTwilioVerify(phone);
+  const verifyServiceSid = await resolveTwilioVerifyServiceSid();
+  if (verifyServiceSid) {
+    return sendVerificationViaTwilioVerify(phone, verifyServiceSid);
   }
 
   if (!config.twilioFromNumber) {
