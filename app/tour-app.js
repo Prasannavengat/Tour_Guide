@@ -1,5 +1,5 @@
 // Configuration
-const API_BASE = 'http://localhost:4000';
+const API_BASE = window.location.origin;
 let currentTourist = null;
 let currentPlace = null;
 let allPlaces = [];

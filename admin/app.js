@@ -1,5 +1,5 @@
 const state = {
-  apiBaseUrl: "http://localhost:4000",
+  apiBaseUrl: window.location.origin,
   token: "",
   sites: [],
   trends: []
@@ -23,6 +23,8 @@ const dom = {
   statsCards: document.getElementById("statsCards"),
   trendChart: document.getElementById("trendChart")
 };
+
+dom.apiBaseUrl.value = state.apiBaseUrl;
 
 function setStatus(message) {
   dom.loginStatus.textContent = message;
@@ -191,7 +193,7 @@ async function loadTrends() {
 
 async function login() {
   try {
-    state.apiBaseUrl = dom.apiBaseUrl.value.trim() || "http://localhost:4000";
+    state.apiBaseUrl = dom.apiBaseUrl.value.trim() || window.location.origin;
     setStatus("Authenticating...");
 
     const data = await postJson(api("/api/admin/login"), {
