@@ -49,8 +49,12 @@ app.use((req, res, next) => {
   next();
 });
 app.use(express.static(frontendPath));
-app.get(["/admin", "/admin/"], (_req, res) => {
-  res.redirect(302, "/admin/?v=live");
+app.get(["/admin", "/admin/"], (req, res, next) => {
+  if (req.query?.v === "live") {
+    return next();
+  }
+
+  return res.redirect(302, "/admin/?v=live");
 });
 app.use("/admin", express.static(adminPath));
 
