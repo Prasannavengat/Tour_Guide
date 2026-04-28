@@ -21,7 +21,15 @@ function setStatus(message) {
 }
 
 function normalizePhone(phone) {
-  return String(phone || "").replace(/\D/g, "");
+  const raw = String(phone || "").trim();
+  if (!raw) return "";
+
+  if (raw.startsWith("+")) {
+    const digits = raw.replace(/\D/g, "");
+    return digits ? `+${digits}` : "";
+  }
+
+  return raw.replace(/\D/g, "");
 }
 
 function getApiUrl(path) {
@@ -47,7 +55,9 @@ async function postJson(url, payload) {
 async function requestOtp() {
   try {
     const phone = normalizePhone(dom.phone.value);
-    if (phone.length < 10 || phone.length > 15) {
+    const digitCount = phone.replace(/\D/g, "").length;
+
+    if (digitCount < 10 || digitCount > 15) {
       setStatus("Enter a valid mobile number.");
       return;
     }

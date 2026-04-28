@@ -7,6 +7,7 @@ export const config = {
   overpassUrl: process.env.OVERPASS_URL || "https://overpass-api.de/api/interpreter",
   overpassBackupUrl:
     process.env.OVERPASS_BACKUP_URL || "https://overpass.kumi.systems/api/interpreter",
+  defaultCountryCode: String(process.env.DEFAULT_COUNTRY_CODE || "91").replace(/\D/g, "") || "91",
   jwtSecret: process.env.JWT_SECRET || "dev-secret",
   adminUsername: process.env.ADMIN_USERNAME || "admin",
   adminPassword: process.env.ADMIN_PASSWORD || "admin123",

@@ -15,6 +15,9 @@ const dom = {
   loginStatus: document.getElementById("loginStatus"),
   logoutBtn: document.getElementById("logoutBtn"),
   siteSelect: document.getElementById("siteSelect"),
+  siteOpen: document.getElementById("siteOpen"),
+  siteCount: document.getElementById("siteCount"),
+  updateSiteBtn: document.getElementById("updateSiteBtn"),
   hoursInput: document.getElementById("hoursInput"),
   refreshBtn: document.getElementById("refreshBtn"),
   statsCards: document.getElementById("statsCards"),
@@ -32,7 +35,7 @@ function api(path) {
 async function postJson(url, body) {
   const response = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: Object.assign({ "Content-Type": "application/json" }, state.token ? { Authorization: `Bearer ${state.token}` } : {}),
     body: JSON.stringify(body)
   });
 
@@ -141,6 +144,37 @@ async function loadSites() {
     option.textContent = site.name;
     dom.siteSelect.appendChild(option);
   });
+
+  // populate selected site details
+  if (dom.siteSelect.options.length) {
+    dom.siteSelect.selectedIndex = 0;
+    onSiteChange();
+  }
+}
+
+function onSiteChange() {
+  const siteId = dom.siteSelect.value;
+  const selectedSite = state.sites.find((s) => s.id === siteId) || null;
+  if (!selectedSite) return;
+  dom.siteCount.value = selectedSite.currentCount || 0;
+  dom.siteOpen.checked = selectedSite.isOpen !== false;
+}
+
+async function updateSite() {
+  try {
+    const siteId = dom.siteSelect.value;
+    const payload = {
+      isOpen: !!dom.siteOpen.checked,
+      currentCount: Number(dom.siteCount.value || 0)
+    };
+
+    const res = await postJson(api(`/api/admin/site/${siteId}`), payload);
+    setStatus('Site updated');
+    // refresh sites list to reflect change
+    await loadSites();
+  } catch (err) {
+    setStatus(`Update failed: ${err.message}`);
+  }
 }
 
 async function loadTrends() {
@@ -194,6 +228,8 @@ function bindEvents() {
   dom.refreshBtn.addEventListener("click", () => {
     loadTrends().catch((error) => setStatus(`Load failed: ${error.message}`));
   });
+  dom.siteSelect.addEventListener('change', onSiteChange);
+  dom.updateSiteBtn.addEventListener('click', updateSite);
 }
 
 async function trySessionRestore() {

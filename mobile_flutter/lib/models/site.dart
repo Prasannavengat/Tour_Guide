@@ -6,6 +6,7 @@ class Site {
   final int capacity;
   final int currentCount;
   final double occupancyRatio;
+  final bool isOpen;
 
   Site({
     required this.id,
@@ -15,6 +16,7 @@ class Site {
     required this.capacity,
     required this.currentCount,
     required this.occupancyRatio,
+    this.isOpen = true,
   });
 
   factory Site.fromJson(Map<String, dynamic> json) {
@@ -26,6 +28,7 @@ class Site {
       capacity: (json['capacity'] as num).toInt(),
       currentCount: (json['currentCount'] as num).toInt(),
       occupancyRatio: (json['occupancyRatio'] as num).toDouble(),
+      isOpen: json['isOpen'] as bool? ?? true,
     );
   }
 }

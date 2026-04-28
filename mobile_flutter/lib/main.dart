@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'screens/home_screen.dart';
-import 'services/api_client.dart';
+import 'screens/tourist_info_screen.dart';
 
 void main() {
   runApp(const TourPulseApp());
@@ -12,8 +11,6 @@ class TourPulseApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final api = ApiClient(baseUrl: 'http://10.0.2.2:4000');
-
     return MaterialApp(
       title: 'Tour Pulse',
       debugShowCheckedModeBanner: false,
@@ -21,7 +18,7 @@ class TourPulseApp extends StatelessWidget {
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF137A6E)),
       ),
-      home: HomeScreen(apiClient: api),
+      home: const TouristInfoScreen(),
     );
   }
 }

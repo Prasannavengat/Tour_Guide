@@ -27,11 +27,30 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const frontendPath = path.resolve(__dirname, "../../app");
 const adminPath = path.resolve(__dirname, "../../admin");
+let currentCount = 0;
 
 app.use(cors());
 app.use(express.json());
 app.use(express.static(frontendPath));
 app.use("/admin", express.static(adminPath));
+
+// Endpoint for ESP device to push the latest crowd count.
+app.post("/update-count", (req, res) => {
+  const count = Number(req.body?.count);
+
+  if (!Number.isFinite(count) || count < 0) {
+    return res.status(400).json({ error: "count must be a non-negative number" });
+  }
+
+  currentCount = Math.floor(count);
+  console.log("Current Crowd Count:", currentCount);
+  return res.status(200).send("Count Received");
+});
+
+// Endpoint for web app to read the latest crowd count.
+app.get("/get-count", (_req, res) => {
+  res.json({ count: currentCount });
+});
 
 app.get("/health", (_req, res) => {
   res.json({
@@ -56,7 +75,7 @@ app.post("/api/auth/request-otp", async (req, res) => {
   try {
     const { phone } = req.body;
 
-    if (config.smsProvider === "twilio" && (await canUseTwilioVerify())) {
+    if (await canUseTwilioVerify()) {
       const smsResult = await sendVerificationCode(phone);
       return res.json({
         ok: true,
@@ -90,7 +109,7 @@ app.post("/api/auth/request-otp", async (req, res) => {
 });
 
 app.post("/api/auth/verify-otp", async (req, res) => {
-  if (config.smsProvider === "twilio" && (await canUseTwilioVerify())) {
+  if (await canUseTwilioVerify()) {
     try {
       const { phone, otp } = req.body;
       const result = await checkVerificationViaTwilioVerify(phone, otp);
@@ -201,6 +220,24 @@ app.get("/api/admin/sites", requireAdmin, (_req, res) => {
   }));
 
   res.json({ count: sites.length, sites });
+});
+
+// Admin: update site properties (open/closed, set count)
+app.post("/api/admin/site/:siteId", requireAdmin, (req, res) => {
+  const { siteId } = req.params;
+  const { isOpen, currentCount } = req.body;
+
+  const site = siteStore.getSite(siteId);
+  if (!site) return res.status(404).json({ error: "Unknown siteId" });
+
+  if (typeof isOpen === 'boolean') site.isOpen = isOpen;
+  if (Number.isFinite(currentCount)) {
+    const newCount = Math.max(0, Math.floor(Number(currentCount)));
+    site.currentCount = Math.min(site.capacity, newCount);
+    site.updatedAt = new Date().toISOString();
+  }
+
+  return res.json({ ok: true, site });
 });
 
 app.get("/api/admin/trends/:siteId", requireAdmin, async (req, res) => {

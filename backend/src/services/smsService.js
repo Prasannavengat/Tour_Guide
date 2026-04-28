@@ -15,20 +15,38 @@ function formatPhoneForFast2Sms(phone) {
 }
 
 function formatPhoneForTwilio(phone) {
-  const digits = String(phone || "").replace(/\D/g, "");
-  if (!digits) return "";
+  const raw = String(phone || "").trim();
+  if (!raw) return "";
 
-  // Default to India country code for 10-digit local mobile numbers.
-  if (digits.length === 10) {
-    return `+91${digits}`;
+  if (raw.startsWith("+")) {
+    const digits = raw.replace(/\D/g, "");
+    if (digits.length < 8 || digits.length > 15) return "";
+    return `+${digits}`;
   }
 
-  return `+${digits}`;
+  if (raw.startsWith("00")) {
+    const digits = raw.slice(2).replace(/\D/g, "");
+    if (digits.length < 8 || digits.length > 15) return "";
+    return `+${digits}`;
+  }
+
+  const digits = raw.replace(/\D/g, "");
+  if (!digits) return "";
+
+  if (digits.length >= 11 && digits.length <= 15) {
+    return `+${digits}`;
+  }
+
+  // For local 10-digit numbers, prepend configurable country code.
+  if (digits.length === 10) {
+    return `+${config.defaultCountryCode}${digits}`;
+  }
+
+  return "";
 }
 
 function hasTwilioConfig() {
   return Boolean(
-    config.smsProvider === "twilio" &&
     config.twilioAccountSid &&
     config.twilioAuthToken
   );
