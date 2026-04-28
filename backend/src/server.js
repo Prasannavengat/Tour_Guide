@@ -31,6 +31,23 @@ let currentCount = 0;
 
 app.use(cors());
 app.use(express.json());
+app.use((req, res, next) => {
+  const cacheablePath =
+    req.path === "/" ||
+    req.path === "/admin" ||
+    req.path === "/admin/" ||
+    req.path.endsWith(".html") ||
+    req.path.endsWith(".js") ||
+    req.path.endsWith(".css");
+
+  if (cacheablePath) {
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+  }
+
+  next();
+});
 app.use(express.static(frontendPath));
 app.use("/admin", express.static(adminPath));
 
