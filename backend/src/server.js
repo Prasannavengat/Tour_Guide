@@ -49,6 +49,9 @@ app.use((req, res, next) => {
   next();
 });
 app.use(express.static(frontendPath));
+app.get(["/admin", "/admin/"], (_req, res) => {
+  res.redirect(302, "/admin/?v=live");
+});
 app.use("/admin", express.static(adminPath));
 
 // Endpoint for ESP device to push the latest crowd count.
